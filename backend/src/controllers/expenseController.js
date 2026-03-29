@@ -1,44 +1,92 @@
+const db = require('../../config/db'); // Make sure this points to your database config!
 const ocrService = require('../services/ocrService');
 
 /**
- * Handles the uploading and scanning of a receipt image.
- * This does NOT save the expense to the database yet. It just returns the OCR data
- * so the frontend can auto-fill the form for the user to review.
+ * OCR Scanner (Keeping your existing code)
  */
 exports.scanReceipt = async (req, res, next) => {
     try {
-        // req.file is populated by the Multer middleware we wrote earlier
         if (!req.file) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'No receipt image provided. Please upload a file.' 
-            });
+            return res.status(400).json({ success: false, message: 'No receipt image provided.' });
         }
-
-        // Pass the image buffer (from RAM) directly to our local Tesseract service
         const extractedData = await ocrService.processReceipt(req.file.buffer);
-
-        // Send the parsed data back to the frontend
-        res.status(200).json({
-            success: true,
-            message: 'Receipt scanned successfully.',
-            data: extractedData
-        });
-
+        res.status(200).json({ success: true, message: 'Receipt scanned successfully.', data: extractedData });
     } catch (error) {
         console.error('Error in scanReceipt controller:', error);
-        next(error); // Passes the error to your global error handler (ExpressError/catchAsync)
+        next(error);
     }
 };
 
 /**
- * Placeholder for the actual final submission (after the user reviews the OCR data).
- * We will flesh this out once your team finishes the Database Models.
+ * 🚀 REAL Submit Expense (Saves to MySQL)
  */
 exports.submitExpense = async (req, res, next) => {
-    // TODO: Validate req.body using Zod/Joi
-    // TODO: Call currencyService to get base company currency conversion
-    // TODO: Save to DB
-    // TODO: Trigger approvalEngine to notify the first manager
-    res.status(201).json({ message: 'Expense submitted successfully (Mock)' });
+    try {
+        const { amount, currency, category, description, expenseDate, isDraft } = req.body;
+        
+        // Hardcoded for now to prove the connection works (Employee Alice)
+        const employeeId = 5; 
+        const companyId = 1; 
+        
+        // Basic fallback for converted amount if your currency service isn't wired up yet
+        const baseCurrency = 'USD';
+        const convertedAmount = amount; 
+        const status = isDraft ? 'DRAFT' : 'PENDING';
+
+        const insertQuery = `
+            INSERT INTO expenses 
+            (employee_id, company_id, category, amount, currency, converted_amount, base_currency, expense_date, description, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const [result] = await db.query(insertQuery, [
+            employeeId, companyId, category, amount, currency, convertedAmount, baseCurrency, expenseDate, description, status
+        ]);
+
+        res.status(201).json({
+            success: true,
+            message: 'Expense submitted successfully to MySQL',
+            expenseId: result.insertId
+        });
+    } catch (error) {
+        console.error("Submit Error:", error);
+        next(error);
+    }
+};
+
+/**
+ * 🚀 REAL Fetch Dashboard (Reads from MySQL)
+ */
+exports.getEmployeeDashboard = async (req, res, next) => {
+    try {
+        const employeeId = 5; // Hardcoded to match our submitter
+
+        const [expenses] = await db.query(
+            'SELECT * FROM expenses WHERE employee_id = ? ORDER BY created_at DESC', 
+            [employeeId]
+        );
+
+        // Map the MySQL column names to match what your React frontend expects
+        const formattedExpenses = expenses.map(e => ({
+            id: e.id,
+            category: e.category,
+            description: e.description || e.remarks,
+            amount: parseFloat(e.amount),
+            currency: e.currency,
+            convertedAmount: parseFloat(e.converted_amount || e.amount),
+            baseCurrency: e.base_currency || 'USD',
+            date: e.expense_date,
+            status: e.status, 
+            approvals: [] // Empty array to prevent React from crashing
+        }));
+
+        res.status(200).json({
+            success: true,
+            data: formattedExpenses,
+            summaryStats: { draft: 0, waitingApproval: 0, approved: 0 }
+        });
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        next(error);
+    }
 };
