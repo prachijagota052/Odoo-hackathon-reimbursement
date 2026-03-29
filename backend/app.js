@@ -1,15 +1,27 @@
 const express = require('express');
+require('dotenv').config();
+
 const app = express();
-
+const adminRoutes = require('./src/routes/admin');
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const ListingRoutes = require('./routes/ListingRoutes');
+
+
 const expenseRoutes = require('./src/routes/expenses');
-
-app.use('/api/listings', ListingRoutes);
 app.use('/api/expenses', expenseRoutes);
 
-const port = 3000;
-app.listen(port, () => {
-    console.log(`app listening on port: ${port}`);
+// Add to your existing route mounts
+app.use('/api/admin', adminRoutes);
+app.use((err, req, res, next) => {
+    console.error("🔥 Error:", err.message);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal Server Error'
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server is running live on port ${PORT}`);
 });
