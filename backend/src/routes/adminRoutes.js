@@ -1,15 +1,15 @@
-const express = require('express');
+import express from "express";
 const router = express.Router();
-const adminController = require('../controllers/adminController');
 
-// In a real app, you would add your `isAdmin` middleware here to protect these routes
-// e.g., router.use(authMiddleware.verifyToken, authMiddleware.isAdmin);
+router.get("/dashboard", getDashboard);
+router.get("/users", getUsers);
+router.put("/users/:id", updateUser);
 
-// User Management
-router.get('/users', adminController.getCompanyUsers);
-router.post('/users', adminController.createUser);
+router.get("/rules", getRules);
+router.post("/rules", createRule);
 
-// Rule Management
-router.post('/rules', adminController.createApprovalRule);
+router.get("/expenses", getExpenses);
+router.put("/expenses/:id/approve", approveExpense);
+router.put("/expenses/:id/reject", rejectExpense);
 
-module.exports = router;
+export default router;

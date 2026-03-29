@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReimburseHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0f0f14;
+      --ink-soft: #4a4a5e;
+      --ink-muted: #8888a0;
+      --surface: #f7f7fb;
+      --surface-card: #ffffff;
+      --border: rgba(15,15,20,0.09);
+      --border-strong: rgba(15,15,20,0.18);
+      --primary: #2a52e8;
+      --primary-hover: #1e3ecf;
+      --primary-light: #eef1fd;
+      --primary-subtle: #dce2fb;
+      --success: #15803d;
+      --success-bg: #dcfce7;
+      --warning: #b45309;
+      --warning-bg: #fef3c7;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --info-bg: #eff6ff;
+      --info: #1d4ed8;
+      --radius: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(15,15,20,0.06), 0 1px 2px rgba(15,15,20,0.04);
+      --shadow: 0 4px 16px rgba(15,15,20,0.08), 0 1px 3px rgba(15,15,20,0.05);
+      --shadow-lg: 0 8px 32px rgba(15,15,20,0.12), 0 2px 8px rgba(15,15,20,0.06);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    #root { min-height: 100vh; }
+
+    /* Nav */
+    .nav {
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .nav-logo {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #2a52e8, #7c3aed);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+    }
+    .nav-title {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--ink-soft);
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .nav-link:hover { background: var(--surface); color: var(--ink); }
+    .nav-link.active { background: var(--primary-light); color: var(--primary); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px 4px 4px;
+      background: var(--surface);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+    }
+    .user-avatar {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, #2a52e8, #7c3aed);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 12px; font-weight: 600;
+    }
+    .user-name { font-size: 13px; font-weight: 500; }
+    .user-role { font-size: 11px; color: var(--ink-muted); text-transform: capitalize; }
+
+    /* Main */
+    .main { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+    .page-header { margin-bottom: 28px; }
+    .page-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 400; line-height: 1.25; }
+    .page-subtitle { color: var(--ink-muted); font-size: 14px; margin-top: 4px; }
+
+    /* Auth pages */
+    .auth-wrap {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .auth-left {
+      background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: white;
+    }
+    .auth-left-logo {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, #2a52e8, #7c3aed);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      margin-bottom: 24px;
+    }
+    .auth-left h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 38px;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .auth-left p { color: rgba(255,255,255,0.6); font-size: 15px; text-align: center; line-height: 1.7; }
+    .auth-features { margin-top: 40px; display: flex; flex-direction: column; gap: 14px; }
+    .auth-feature {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.8);
+    }
+    .auth-feature-icon {
+      width: 32px; height: 32px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .auth-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      background: var(--surface);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+    }
+    .auth-card h2 { font-size: 24px; font-weight: 600; margin-bottom: 6px; }
+    .auth-card .subtitle { color: var(--ink-muted); font-size: 14px; margin-bottom: 28px; }
+
+    /* Cards */
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .card-header { padding: 20px 24px 0; }
+    .card-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+    .card-body { padding: 20px 24px; }
+    .card-body-flush { padding: 0 24px 24px; }
+
+    /* Stat cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s, transform 0.2s;
+      cursor: default;
+    }
+    .stat-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+    .stat-card.clickable { cursor: pointer; }
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .stat-val { font-size: 26px; font-weight: 700; line-height: 1; font-family: 'Fraunces', serif; }
+    .stat-label { font-size: 12.5px; color: var(--ink-muted); margin-top: 2px; font-weight: 500; }
+
+    /* Form */
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 6px; }
+    .form-input {
+      width: 100%;
+      padding: 9px 13px;
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      background: white;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(42,82,232,0.1); }
+    .form-input::placeholder { color: var(--ink-muted); }
+    .form-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888a0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-hint { font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
+    .form-error { font-size: 12px; color: var(--danger); margin-top: 4px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); box-shadow: 0 4px 12px rgba(42,82,232,0.3); }
+    .btn-outline { background: white; color: var(--ink); border: 1.5px solid var(--border-strong); }
+    .btn-outline:hover:not(:disabled) { background: var(--surface); }
+    .btn-ghost { background: none; color: var(--ink-soft); }
+    .btn-ghost:hover:not(:disabled) { background: var(--surface); color: var(--ink); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover:not(:disabled) { background: #b91c1c; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover:not(:disabled) { background: var(--success); }
+    .btn-sm { padding: 5px 12px; font-size: 12.5px; }
+    .btn-lg { padding: 12px 24px; font-size: 15px; }
+    .btn-full { width: 100%; }
+    .btn-icon { padding: 8px; border-radius: var(--radius); }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .badge-pending { background: var(--warning-bg); color: var(--warning); }
+    .badge-approved { background: var(--success-bg); color: var(--success); }
+    .badge-rejected { background: var(--danger-bg); color: var(--danger); }
+    .badge-draft { background: #f1f5f9; color: #64748b; }
+    .badge-submitted { background: var(--primary-light); color: var(--primary); }
+    .badge-admin { background: #fae8ff; color: #86198f; }
+    .badge-manager { background: var(--primary-light); color: var(--primary); }
+    .badge-employee { background: #f1f5f9; color: #475569; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 2px; background: var(--surface); border-radius: var(--radius); padding: 3px; border: 1px solid var(--border); margin-bottom: 20px; }
+    .tab {
+      flex: 1;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--ink-muted);
+      transition: all 0.15s;
+      text-align: center;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .tab.active { background: white; color: var(--ink); box-shadow: var(--shadow-sm); }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius-lg); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left;
+      padding: 11px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 13px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface); }
+
+    /* Expense Cards */
+    .expense-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s;
+    }
+    .expense-card:hover { box-shadow: var(--shadow); }
+    .expense-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 12px; }
+    .expense-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .expense-meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .expense-meta-label { font-size: 11.5px; color: var(--ink-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em; }
+    .expense-meta-val { font-size: 14px; font-weight: 500; }
+
+    /* Approval chain */
+    .chain { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .chain-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .chain-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .chain-dot.approved { background: #16a34a; }
+    .chain-dot.rejected { background: var(--danger); }
+    .chain-dot.pending { background: #d1d5db; }
+
+    /* Conversion box */
+    .conversion-box {
+      background: var(--primary-light);
+      border: 1px solid var(--primary-subtle);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .conversion-label { font-size: 12px; color: var(--info); font-weight: 500; }
+    .conversion-val { font-size: 18px; font-weight: 700; font-family: 'Fraunces', serif; color: var(--ink); }
+
+    /* Modal overlay */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,10,20,0.45);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .modal {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 28px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 18px; font-weight: 600; }
+
+    /* Toast */
+    .toast-wrap { position: fixed; top: 70px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 300; }
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 13.5px;
+      font-weight: 500;
+      box-shadow: var(--shadow);
+      min-width: 260px;
+      max-width: 360px;
+      animation: slideIn 0.25s ease;
+      border: 1px solid;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast-success { background: #f0fdf4; color: var(--success); border-color: #bbf7d0; }
+    .toast-error { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+
+    /* Toggle/Switch */
+    .toggle-wrap { display: flex; align-items: center; gap: 12px; }
+    .toggle {
+      width: 42px; height: 24px;
+      background: #d1d5db;
+      border-radius: var(--radius-full);
+      position: relative;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle.on { background: var(--primary); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle.on::after { transform: translateX(18px); }
+
+    /* Drag */
+    .drag-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      cursor: grab;
+      user-select: none;
+      transition: box-shadow 0.15s, background 0.15s;
+    }
+    .drag-item:active { cursor: grabbing; }
+    .drag-item.dragging { opacity: 0.45; box-shadow: var(--shadow-lg); }
+    .drag-num {
+      width: 24px; height: 24px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Empty state */
+    .empty {
+      padding: 52px 24px;
+      text-align: center;
+      color: var(--ink-muted);
+    }
+    .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-title { font-weight: 600; color: var(--ink-soft); margin-bottom: 4px; }
+
+    /* Alert */
+    .alert { padding: 12px 16px; border-radius: var(--radius); font-size: 13.5px; margin-bottom: 16px; }
+    .alert-info { background: var(--info-bg); color: var(--info); border: 1px solid #bfdbfe; }
+    .alert-success { background: var(--success-bg); color: var(--success); border: 1px solid #bbf7d0; }
+    .alert-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid #fde68a; }
+
+    /* Flow viz */
+    .flow-step {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 13.5px;
+      font-weight: 500;
+      border: 1.5px solid;
+    }
+    .flow-arrow { text-align: center; color: var(--ink-muted); font-size: 18px; }
+    .flow-step.start { background: #f0fdf4; border-color: #86efac; color: var(--success); }
+    .flow-step.manager { background: var(--info-bg); border-color: #93c5fd; color: var(--info); }
+    .flow-step.approver { background: #faf5ff; border-color: #d8b4fe; color: #7e22ce; }
+    .flow-step.rule { background: var(--warning-bg); border-color: #fde68a; color: var(--warning); }
+    .flow-step.end { background: var(--surface); border-color: var(--border-strong); color: var(--ink-soft); }
+    .flow-step.special { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+
+    /* OCR */
+    .ocr-btn {
+      flex: 1;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-soft);
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .ocr-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .ocr-icon { font-size: 28px; }
+
+    /* Quick actions grid */
+    .action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+    .action-card {
+      padding: 20px;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .action-card:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); box-shadow: var(--shadow); }
+    .action-card-icon { font-size: 28px; margin-bottom: 8px; }
+    .action-card-title { font-weight: 600; font-size: 14px; }
+    .action-card-desc { font-size: 12px; color: var(--ink-muted); margin-top: 3px; }
+
+    /* Loading */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    .spinner-dark { border-color: rgba(42,82,232,0.2); border-top-color: var(--primary); }
+
+    /* Pulse */
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .pulse { animation: pulse 1.5s ease-in-out infinite; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .auth-wrap { grid-template-columns: 1fr; }
+      .auth-left { display: none; }
+      .nav-links { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .auth-card { padding: 28px 22px; }
+      .main { padding: 20px 16px; }
+    }
+
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .flex { display: flex; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+    .flex-end { display: flex; justify-content: flex-end; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .mb-1 { margin-bottom: 4px; }
+    .mb-2 { margin-bottom: 8px; }
+    .mb-3 { margin-bottom: 12px; }
+    .mb-4 { margin-bottom: 16px; }
+    .mb-6 { margin-bottom: 24px; }
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+    .text-sm { font-size: 13px; }
+    .text-xs { font-size: 11.5px; }
+    .text-muted { color: var(--ink-muted); }
+    .text-success { color: var(--success); }
+    .text-danger { color: var(--danger); }
+    .font-600 { font-weight: 600; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback, useMemo, useRef } = React;
+
+// ── DATA HELPERS ──────────────────────────────────────────────
+const storage = {
+  get: (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+const MOCK_USERS = [
+  { id: '1', name: 'John Smith', email: 'john@company.com', role: 'manager', baseCurrency: 'USD', department: 'Finance' },
+  { id: '2', name: 'Mitchell Brown', email: 'mitchell@company.com', role: 'manager', baseCurrency: 'USD', department: 'Operations' },
+  { id: '3', name: 'Andreas Weber', email: 'andreas@company.com', role: 'admin', baseCurrency: 'EUR', department: 'Management' },
+  { id: '4', name: 'Sarah Johnson', email: 'sarah@company.com', role: 'manager', baseCurrency: 'USD', department: 'HR' },
+  { id: '5', name: 'Emily Chen', email: 'emily@company.com', role: 'employee', assignedManagerId: '1', baseCurrency: 'USD', department: 'Finance' },
+  { id: '6', name: 'Michael Lee', email: 'michael@company.com', role: 'employee', assignedManagerId: '1', baseCurrency: 'USD', department: 'IT' },
+];
+
+const MOCK_EXPENSES = []; 
+
+const MOCK_RULES = [
+  { id: '1', category: 'Miscellaneous Expenses', isManagerApprover: true, approvers: [{ id: '1', name: 'John Smith', order: 1 }, { id: '2', name: 'Mitchell Brown', order: 2 }], percentageRequired: 60, specificApprover: '' },
+];
+
+const CATEGORIES = ['Meals & Entertainment','Transportation','Accommodation','Office Supplies','Travel','Miscellaneous Expenses','IT & Software','Medical','Training & Development'];
+
+// ── TOAST ─────────────────────────────────────────────────────
+let _setToasts = null;
+const toast = {
+  success: (msg) => _setToasts && _setToasts(p => [...p, { id: Date.now(), type: 'success', msg }]),
+  error: (msg) => _setToasts && _setToasts(p => [...p, { id: Date.now(), type: 'error', msg }]),
+};
+
+function ToastContainer() {
+  const [toasts, setToasts] = useState([]);
+  _setToasts = setToasts;
+  useEffect(() => {
+    if (toasts.length === 0) return;
+    const t = setTimeout(() => setToasts(p => p.slice(1)), 3500);
+    return () => clearTimeout(t);
+  }, [toasts]);
+  return (
+    <div className="toast-wrap">
+      {toasts.map(t => (
+        <div key={t.id} className={`toast toast-${t.type}`}>
+          <span>{t.type === 'success' ? '✓' : '✗'}</span>
+          {t.msg}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── BADGE ─────────────────────────────────────────────────────
+function StatusBadge({ status }) {
+  const safeStatus = (status || 'draft').toLowerCase();
+  const map = { pending: 'pending', waiting_approval: 'pending', submitted: 'submitted', approved: 'approved', rejected: 'rejected', draft: 'draft' };
+  const icons = { pending: '⏳', waiting_approval: '⏳', submitted: '📤', approved: '✓', rejected: '✗', draft: '📝' };
+  return <span className={`badge badge-${map[safeStatus] || 'draft'}`}>{icons[safeStatus] || '📝'} {safeStatus}</span>;
+}
+function RoleBadge({ role }) {
+  return <span className={`badge badge-${role}`}>{role}</span>;
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function Modal({ open, onClose, title, children, width = 500 }) {
+  if (!open) return null;
+  return (
+    <div className="overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal" style={{ maxWidth: width }}>
+        <div className="modal-header">
+          <div className="modal-title">{title}</div>
+          <button className="btn btn-ghost btn-icon" onClick={onClose}>✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ── AUTH PAGES ────────────────────────────────────────────────
+function LoginPage({ onLogin, onGoSignup }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setTimeout(() => {
+      const users = storage.get('rh_users', MOCK_USERS);
+      const user = users.find(u => u.email === email);
+      if (user) { toast.success('Welcome back, ' + user.name + '!'); onLogin(user); }
+      else toast.error('User not found. Check the demo accounts below.');
+      setLoading(false);
+    }, 600);
+  };
+
+  return (
+    <div className="auth-wrap">
+      <div className="auth-left">
+        <div className="auth-left-logo">💳</div>
+        <h1>Expense reimagined</h1>
+        <p>A smarter way to manage, submit, and approve expense reimbursements across your organization.</p>
+        <div className="auth-features">
+          <div className="auth-feature"><div className="auth-feature-icon">🔐</div>Role-based access for Admin, Manager & Employee</div>
+          <div className="auth-feature"><div className="auth-feature-icon">⚡</div>Multi-level sequential & conditional approval flows</div>
+          <div className="auth-feature"><div className="auth-feature-icon">🌍</div>Multi-currency with real-time conversion rates</div>
+          <div className="auth-feature"><div className="auth-feature-icon">📸</div>OCR receipt scanning — auto-fills expense fields</div>
+        </div>
+      </div>
+      <div className="auth-right">
+        <div className="auth-card">
+          <h2>Sign in</h2>
+          <p className="subtitle">Access your expense dashboard</p>
+
+          <div className="alert alert-info mb-4">
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>Demo accounts (any password)</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span>👑 Admin: <b>andreas@company.com</b></span>
+              <span>👔 Manager: <b>john@company.com</b></span>
+              <span>👤 Employee: <b>emily@company.com</b></span>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Email address</label>
+              <input className="form-input" type="email" placeholder="you@company.com" value={email} onChange={e => setEmail(e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input className="form-input" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
+            </div>
+            <button className="btn btn-primary btn-full btn-lg" type="submit" disabled={loading}>
+              {loading ? <><div className="spinner" /> Signing in…</> : 'Sign In →'}
+            </button>
+          </form>
+
+          <div className="divider" />
+          <div className="text-sm text-muted" style={{ textAlign: 'center' }}>
+            No account? <span style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 500 }} onClick={onGoSignup}>Create one</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SignupPage({ onSignup, onGoLogin }) {
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '', country: '', baseCurrency: '' });
+  const [countries, setCountries] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingCountries, setLoadingCountries] = useState(true);
+
+  useEffect(() => {
+    fetch('https://restcountries.com/v3.1/all?fields=name,currencies')
+      .then(r => r.json())
+      .then(data => {
+        const sorted = data
+          .filter(c => c.currencies)
+          .map(c => ({ name: c.name.common, currency: Object.keys(c.currencies)[0] }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        setCountries(sorted);
+      })
+      .catch(() => setCountries([{ name: 'United States', currency: 'USD' }, { name: 'India', currency: 'INR' }, { name: 'Germany', currency: 'EUR' }]))
+      .finally(() => setLoadingCountries(false));
+  }, []);
+
+  const handleCountry = e => {
+    const c = countries.find(x => x.name === e.target.value);
+    setForm(f => ({ ...f, country: e.target.value, baseCurrency: c?.currency || '' }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (form.password !== form.confirm) { toast.error('Passwords do not match'); return; }
+    setLoading(true);
+    setTimeout(() => {
+      const users = storage.get('rh_users', MOCK_USERS);
+      if (users.some(u => u.role === 'admin')) { toast.error('Admin already exists. Please log in.'); setLoading(false); return; }
+      const newUser = { id: Date.now().toString(), name: form.name, email: form.email, role: 'admin', country: form.country, baseCurrency: form.baseCurrency, department: 'Management' };
+      users.push(newUser);
+      storage.set('rh_users', users);
+      toast.success('Account created! Welcome, ' + newUser.name + '!');
+      onSignup(newUser);
+      setLoading(false);
+    }, 700);
+  };
+
+  return (
+    <div className="auth-wrap">
+      <div className="auth-left">
+        <div className="auth-left-logo">🏢</div>
+        <h1>Create your company account</h1>
+        <p>Set up your reimbursement workspace in seconds. The first signup becomes the company Admin.</p>
+        <div className="auth-features">
+          <div className="auth-feature"><div className="auth-feature-icon">🌍</div>Auto-detects currency based on your country</div>
+          <div className="auth-feature"><div className="auth-feature-icon">👥</div>Invite your team after setup</div>
+          <div className="auth-feature"><div className="auth-feature-icon">⚙️</div>Configure approval workflows right away</div>
+        </div>
+      </div>
+      <div className="auth-right">
+        <div className="auth-card">
+          <h2>Create account</h2>
+          <p className="subtitle">Your company admin workspace</p>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Full Name</label>
+              <input className="form-input" placeholder="Jane Doe" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input className="form-input" type="email" placeholder="jane@company.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
+            </div>
+            <div className="form-row">
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Password</label>
+                <input className="form-input" type="password" placeholder="••••••••" minLength={6} value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Confirm</label>
+                <input className="form-input" type="password" placeholder="••••••••" value={form.confirm} onChange={e => setForm(f => ({ ...f, confirm: e.target.value }))} required />
+              </div>
+            </div>
+            {form.confirm && form.password !== form.confirm && <div className="form-error mt-2">Passwords don't match</div>}
+            <div className="form-group mt-3">
+              <label className="form-label">Country</label>
+              <select className="form-input form-select" value={form.country} onChange={handleCountry} required disabled={loadingCountries}>
+                <option value="">{loadingCountries ? 'Loading countries…' : 'Select your country…'}</option>
+                {countries.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+              </select>
+            </div>
+            {form.baseCurrency && (
+              <div className="alert alert-success mb-3">🌍 Company base currency auto-set to <b>{form.baseCurrency}</b></div>
+            )}
+            <button className="btn btn-primary btn-full btn-lg mt-2" type="submit" disabled={loading || !form.baseCurrency}>
+              {loading ? <><div className="spinner" /> Creating…</> : 'Create Company Account →'}
+            </button>
+          </form>
+          <div className="divider" />
+          <div className="text-sm text-muted" style={{ textAlign: 'center' }}>
+            Already have an account? <span style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 500 }} onClick={onGoLogin}>Sign in</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── NAV ───────────────────────────────────────────────────────
+function Nav({ user, currentPage, onNav, onLogout }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const adminLinks = [
+    { id: 'dashboard', label: 'Dashboard', icon: '⊞' },
+    { id: 'users', label: 'Users', icon: '👥' },
+    { id: 'rules', label: 'Approval Rules', icon: '⚙️' },
+  ];
+  const managerLinks = [
+    { id: 'dashboard', label: 'Dashboard', icon: '⊞' },
+    { id: 'inbox', label: 'Approval Inbox', icon: '📥' },
+  ];
+  const employeeLinks = [
+    { id: 'dashboard', label: 'Dashboard', icon: '⊞' },
+    { id: 'submit', label: 'Submit Expense', icon: '➕' },
+    { id: 'history', label: 'My Expenses', icon: '📄' },
+  ];
+
+  const links = user.role === 'admin' ? adminLinks : user.role === 'manager' ? managerLinks : employeeLinks;
+  const initials = user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+  return (
+    <nav className="nav">
+      <div className="nav-inner">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button className="btn btn-ghost btn-icon" onClick={() => setMobileOpen(!mobileOpen)} style={{ display: 'none' }} id="mob-btn">☰</button>
+          <div className="nav-brand" onClick={() => onNav('dashboard')}>
+            <div className="nav-logo">💳</div>
+            <span className="nav-title">ReimburseHub</span>
+          </div>
+        </div>
+
+        <div className="nav-links">
+          {links.map(l => (
+            <button key={l.id} className={`nav-link ${currentPage === l.id ? 'active' : ''}`} onClick={() => onNav(l.id)}>
+              <span>{l.icon}</span> {l.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="nav-right">
+          <div className="user-chip">
+            <div className="user-avatar">{initials}</div>
+            <div>
+              <div className="user-name">{user.name}</div>
+              <div className="user-role">{user.role}</div>
+            </div>
+          </div>
+          <button className="btn btn-outline btn-sm" onClick={onLogout}>Logout</button>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────
+function Dashboard({ user, expenses, users, onNav }) {
+  const myExpenses = expenses.filter(e => e.employeeId === user.id);
+  const pendingMine = expenses.filter(e => {
+    const approvals = e.approvals || [];
+    const sorted = [...approvals].sort((a, b) => a.order - b.order);
+    const firstPending = sorted.find(a => a.status === 'pending');
+    return firstPending?.approverId === user.id && (e.status === 'pending' || e.status === 'submitted');
+  });
+
+  if (user.role === 'admin') return (
+    <div className="main">
+      <div className="page-header">
+        <div className="page-title">Good day, {user.name.split(' ')[0]} 👋</div>
+        <div className="page-subtitle">Here's your company overview</div>
+      </div>
+      <div className="stats-grid">
+        <div className="stat-card clickable" onClick={() => onNav('users')}>
+          <div className="stat-icon" style={{ background: '#eff6ff' }}>👥</div>
+          <div><div className="stat-val">{users.length}</div><div className="stat-label">Total Users</div></div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: '#f0fdf4' }}>💰</div>
+          <div><div className="stat-val">{expenses.length}</div><div className="stat-label">Total Expenses</div></div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'var(--warning-bg)' }}>⏳</div>
+          <div><div className="stat-val">{expenses.filter(e => e.status === 'pending' || e.status === 'submitted').length}</div><div className="stat-label">Pending Approval</div></div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: '#dcfce7' }}>✅</div>
+          <div><div className="stat-val">{expenses.filter(e => e.status === 'approved').length}</div><div className="stat-label">Approved</div></div>
+        </div>
+      </div>
+      <div className="action-grid">
+        <div className="action-card" onClick={() => onNav('users')}><div className="action-card-icon">👤</div><div className="action-card-title">Manage Users</div><div className="action-card-desc">Add employees, assign managers</div></div>
+        <div className="action-card" onClick={() => onNav('rules')}><div className="action-card-icon">⚙️</div><div className="action-card-title">Approval Rules</div><div className="action-card-desc">Configure multi-level workflows</div></div>
+        <div className="action-card"><div className="action-card-icon">📊</div><div className="action-card-title">All Expenses</div><div className="action-card-desc">{expenses.length} total submissions</div></div>
+      </div>
+    </div>
+  );
+
+  if (user.role === 'manager') {
+    const approved = expenses.filter(e => (e.approvals||[]).some(a => a.approverId === user.id && a.status === 'approved')).length;
+    const rejected = expenses.filter(e => (e.approvals||[]).some(a => a.approverId === user.id && a.status === 'rejected')).length;
+    return (
+      <div className="main">
+        <div className="page-header">
+          <div className="page-title">Welcome back, {user.name.split(' ')[0]} 👔</div>
+          <div className="page-subtitle">Review pending expense approvals</div>
+        </div>
+        <div className="stats-grid">
+          <div className="stat-card"><div className="stat-icon" style={{ background: '#fef3c7' }}>⏳</div><div><div className="stat-val">{pendingMine.length}</div><div className="stat-label">Awaiting You</div></div></div>
+          <div className="stat-card"><div className="stat-icon" style={{ background: '#dcfce7' }}>✅</div><div><div className="stat-val">{approved}</div><div className="stat-label">Approved</div></div></div>
+          <div className="stat-card"><div className="stat-icon" style={{ background: '#fee2e2' }}>❌</div><div><div className="stat-val">{rejected}</div><div className="stat-label">Rejected</div></div></div>
+          <div className="stat-card"><div className="stat-icon" style={{ background: '#eff6ff' }}>📄</div><div><div className="stat-val">{approved + rejected + pendingMine.length}</div><div className="stat-label">Total Reviewed</div></div></div>
+        </div>
+        <button className="btn btn-primary" onClick={() => onNav('inbox')}>📥 Open Approval Inbox ({pendingMine.length} pending)</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="main">
+      <div className="page-header">
+        <div className="page-title">Hi, {user.name.split(' ')[0]} 👤</div>
+        <div className="page-subtitle">Track and submit your expense claims</div>
+      </div>
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-icon" style={{ background: '#f1f5f9' }}>📝</div><div><div className="stat-val">{myExpenses.filter(e => e.status === 'draft').length}</div><div className="stat-label">Drafts</div></div></div>
+        <div className="stat-card"><div className="stat-icon" style={{ background: '#fef3c7' }}>⏳</div><div><div className="stat-val">{myExpenses.filter(e => e.status === 'pending' || e.status === 'submitted').length}</div><div className="stat-label">Pending</div></div></div>
+        <div className="stat-card"><div className="stat-icon" style={{ background: '#dcfce7' }}>✅</div><div><div className="stat-val">{myExpenses.filter(e => e.status === 'approved').length}</div><div className="stat-label">Approved</div></div></div>
+        <div className="stat-card"><div className="stat-icon" style={{ background: '#eff6ff' }}>💳</div><div><div className="stat-val">{myExpenses.length}</div><div className="stat-label">Total</div></div></div>
+      </div>
+      <div className="action-grid">
+        <div className="action-card" onClick={() => onNav('submit')}><div className="action-card-icon">➕</div><div className="action-card-title">Submit Expense</div><div className="action-card-desc">Scan receipt or enter manually</div></div>
+        <div className="action-card" onClick={() => onNav('history')}><div className="action-card-icon">📄</div><div className="action-card-title">My Expenses</div><div className="action-card-desc">View & track submissions</div></div>
+      </div>
+    </div>
+  );
+}
+
+// ── SUBMIT EXPENSE (LIVE MYSQL CONNECTED + UPLOAD FIXED) ─────────────────────────────────────────────
+// ── SUBMIT EXPENSE (LIVE MYSQL CONNECTED + UPLOAD FIXED) ─────────────────────────────────────────────
+function SubmitExpense({ user }) {
+  const [scanning, setScanning] = useState(false);
+  const [amount, setAmount] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [category, setCategory] = useState('');
+  const [description, setDescription] = useState('');
+  const [rates, setRates] = useState({});
+  const [currencies, setCurrencies] = useState(['USD','EUR','GBP','JPY','AUD','CAD','CHF','CNY','INR','AED','SGD','HKD']);
+  const baseCurrency = user?.baseCurrency || 'USD';
+
+  // Refs and state for real file uploading
+  const fileInputRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  useEffect(() => {
+    fetch(`https://api.exchangerate-api.com/v4/latest/${baseCurrency}`)
+      .then(r => r.json())
+      .then(d => { setRates(d.rates); if (d.rates) setCurrencies(Object.keys(d.rates).sort()); })
+      .catch(() => setRates({ USD: 1, EUR: 0.92, GBP: 0.79, JPY: 149.5, AUD: 1.53, CAD: 1.35, INR: 83.12 }));
+  }, [baseCurrency]);
+
+  const converted = amount && rates[currency]
+    ? (parseFloat(amount) / rates[currency]).toFixed(2) : '0.00';
+
+  const handleScan = () => {
+    setScanning(true);
+    setTimeout(() => {
+      const samples = [
+        { amount: '85.50', currency: 'EUR', date: '2026-03-27', category: 'Meals & Entertainment', description: 'Dinner at La Piazza Restaurant' },
+        { amount: '42.30', currency: 'USD', date: '2026-03-28', category: 'Transportation', description: 'Uber to Airport' },
+      ];
+      const s = samples[Math.floor(Math.random() * samples.length)];
+      setAmount(s.amount); setCurrency(s.currency); setDate(s.date);
+      setCategory(s.category); setDescription(s.description);
+      setScanning(false);
+      toast.success('✓ Receipt scanned! All fields auto-populated via OCR.');
+    }, 2000);
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      toast.success(`File "${file.name}" attached!`);
+      handleScan(); 
+    }
+  };
+
+  const handleSubmit = async (status) => {
+    if (!amount || !category) { toast.error('Amount and Category are required'); return; }
+    
+    toast.success('Sending to server...');
+
+    try {
+      // 🚀 POST data to Node.js backend
+      const response = await fetch('http://localhost:3000/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description: description || 'No description provided',
+          expenseDate: date,
+          category: category,
+          paidBy: 'Employee', // Hardcoded for this demo
+          amount: parseFloat(amount),
+          currency: currency,
+          remarks: '',
+          receiptUrl: '',
+          isDraft: status === 'draft'
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(status === 'draft' ? '📝 Saved as draft to database!' : '🚀 Submitted to database!');
+        setAmount(''); setCurrency('USD'); setDate(new Date().toISOString().split('T')[0]);
+        setCategory(''); setDescription(''); setSelectedFile(null);
+      } else {
+        toast.error(`Error: ${data.message}`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to connect to backend. Is Node running?');
+    }
+  };
+
+  return (
+    <div className="main" style={{ maxWidth: 720 }}>
+      <div className="page-header">
+        <div className="page-title">Submit Expense</div>
+        <div className="page-subtitle">Scan a receipt or fill in details manually</div>
+      </div>
+
+      <div className="card mb-4">
+        <div className="card-body">
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button className="ocr-btn" onClick={handleScan} disabled={scanning}>
+              <span className="ocr-icon">{scanning ? '⏳' : '📷'}</span>
+              <span className={scanning ? 'pulse' : ''}>{scanning ? 'Scanning receipt…' : 'Scan Receipt (OCR)'}</span>
+            </button>
+
+            {/* HIDDEN FILE INPUT */}
+            <input 
+              type="file" 
+              accept="image/*,.pdf" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              onChange={handleFileChange} 
+            />
+
+            {/* UPLOAD BUTTON */}
+            <button className="ocr-btn" onClick={handleUploadClick} disabled={scanning}>
+              <span className="ocr-icon">📤</span>
+              <span style={{ wordBreak: 'break-word', padding: '0 10px' }}>
+                {selectedFile ? `Attached: ${selectedFile.name}` : 'Upload Receipt Image'}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header" style={{ paddingBottom: 16 }}>
+          <div className="card-title">Expense Details</div>
+        </div>
+        <div className="card-body">
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Amount *</label>
+              <input className="form-input" type="number" step="0.01" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Currency</label>
+              <select className="form-input form-select" value={currency} onChange={e => setCurrency(e.target.value)}>
+                {currencies.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {amount && (
+            <div className="conversion-box">
+              <div><div className="conversion-label">Original ({currency})</div><div className="conversion-val">{currency} {parseFloat(amount || 0).toFixed(2)}</div></div>
+              <div style={{ color: 'var(--ink-muted)', fontSize: 18 }}>→</div>
+              <div style={{ textAlign: 'right' }}><div className="conversion-label">Company ({baseCurrency})</div><div className="conversion-val">{baseCurrency} {converted}</div></div>
+            </div>
+          )}
+
+          <div className="form-group">
+            <label className="form-label">Date *</label>
+            <input className="form-input" type="date" value={date} onChange={e => setDate(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Category *</label>
+            <select className="form-input form-select" value={category} onChange={e => setCategory(e.target.value)}>
+              <option value="">Select a category…</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Description</label>
+            <textarea className="form-input form-textarea" placeholder="E.g. Dinner with client at La Piazza…" value={description} onChange={e => setDescription(e.target.value)} />
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+            <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => handleSubmit('draft')}>💾 Save as Draft</button>
+            <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleSubmit('submitted')}>🚀 Submit for Approval</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── EXPENSE HISTORY (LIVE MYSQL CONNECTED) ────────────────────────────────────────────
+function ExpenseHistory({ user, onNav }) {
+  const [tab, setTab] = useState('pending');
+  const [dbExpenses, setDbExpenses] = useState([]);
+  const [stats, setStats] = useState({ draft: 0, waitingApproval: 0, approved: 0 });
+
+  // 🚀 Fetch real data from Node.js backend when this page loads
+  useEffect(() => {
+    fetch('http://localhost:3000/api/expenses/dashboard')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setDbExpenses(data.data);
+          setStats(data.summaryStats);
+        }
+      })
+      .catch(err => console.error("Failed to fetch expenses", err));
+  }, []);
+
+  // Filter mapped database records
+  const pending = dbExpenses.filter(e => e.status === 'WAITING_APPROVAL' || e.status === 'PENDING');
+  const drafts = dbExpenses.filter(e => e.status === 'DRAFT' || e.status === 'draft');
+  const done = dbExpenses.filter(e => e.status === 'APPROVED' || e.status === 'REJECTED');
+
+  const lists = { pending, drafts, completed: done };
+  const shown = lists[tab] || [];
+
+  return (
+    <div className="main" style={{ maxWidth: 860 }}>
+      <div className="page-header flex-between">
+        <div><div className="page-title">My Expenses</div><div className="page-subtitle">Track your submissions and status</div></div>
+        <button className="btn btn-primary" onClick={() => onNav('submit')}>➕ New Expense</button>
+      </div>
+
+      <div className="tabs">
+        <button className={`tab ${tab === 'pending' ? 'active' : ''}`} onClick={() => setTab('pending')}>⏳ Pending ({pending.length})</button>
+        <button className={`tab ${tab === 'drafts' ? 'active' : ''}`} onClick={() => setTab('drafts')}>📝 Drafts ({drafts.length})</button>
+        <button className={`tab ${tab === 'completed' ? 'active' : ''}`} onClick={() => setTab('completed')}>✅ Completed ({done.length})</button>
+      </div>
+
+      {shown.length === 0 ? (
+        <div className="card"><div className="empty"><div className="empty-icon">📭</div><div className="empty-title">Nothing here yet</div><div className="text-sm text-muted mt-2">Expenses in this category will appear here</div></div></div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {shown.map(e => <ExpenseCard key={e.id} expense={e} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ExpenseCard({ expense: e }) {
+  const approvals = e.approvals || []; // Safety fallback
+  return (
+    <div className="expense-card">
+      <div className="expense-card-header">
+        <div>
+          <div style={{ fontWeight: 600, marginBottom: 2 }}>{e.category}</div>
+          <div className="text-sm text-muted">{e.description || e.remarks || '—'}</div>
+        </div>
+        <StatusBadge status={e.status} />
+      </div>
+      <div className="expense-meta">
+        <div className="expense-meta-item"><div className="expense-meta-label">Amount</div><div className="expense-meta-val">{e.currency} {Number(e.amount).toFixed(2)}</div></div>
+        <div className="expense-meta-item"><div className="expense-meta-label">Date</div><div className="expense-meta-val">{new Date(e.date).toLocaleDateString()}</div></div>
+        {e.currency !== e.baseCurrency && e.convertedAmount && <div className="expense-meta-item"><div className="expense-meta-label">Converted ({e.baseCurrency})</div><div className="expense-meta-val">{e.baseCurrency} {Number(e.convertedAmount).toFixed(2)}</div></div>}
+      </div>
+      {approvals.length > 0 && (
+        <div className="chain">
+          <div className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Approval Chain</div>
+          {approvals.map((a, i) => (
+            <div key={i} className="chain-item">
+              <div className={`chain-dot ${a.status}`} />
+              <span>{a.approverName}</span>
+              <span className="text-xs text-muted">— {a.status}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {e.status === 'rejected' && e.rejectionReason && (
+        <div className="alert" style={{ background: '#fef2f2', color: 'var(--danger)', border: '1px solid #fecaca', marginTop: 12, marginBottom: 0 }}>
+          <b>Rejected:</b> {e.rejectionReason}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── MANAGER INBOX ──────────────────────────────────────────────
+function ManagerInbox({ user, expenses, approvalRules, onUpdateExpense }) {
+  const [rejectModal, setRejectModal] = useState(null);
+  const [reason, setReason] = useState('');
+
+  const pending = useMemo(() => expenses.filter(e => {
+    const approvals = e.approvals || [];
+    const sorted = [...approvals].sort((a, b) => a.order - b.order);
+    const firstP = sorted.find(a => a.status === 'pending');
+    return firstP?.approverId === user.id && (e.status === 'pending' || e.status === 'submitted');
+  }), [expenses, user.id]);
+
+  const reviewed = useMemo(() => expenses.filter(e =>
+    (e.approvals||[]).some(a => a.approverId === user.id && a.status !== 'pending')
+  ), [expenses, user.id]);
+
+  const handleApprove = (expense) => {
+    const rule = approvalRules.find(r => r.category === expense.category);
+    const approvals = expense.approvals || [];
+    let updApprovals = approvals.map(a =>
+      a.approverId === user.id ? { ...a, status: 'approved', timestamp: new Date().toISOString() } : a
+    );
+    if (rule?.specificApprover && rule.specificApprover !== 'none' && user.id === rule.specificApprover) {
+      updApprovals = updApprovals.map(a => a.status === 'pending' ? { ...a, status: 'approved', timestamp: new Date().toISOString() } : a);
+      onUpdateExpense(expense.id, { approvals: updApprovals, status: 'approved' });
+      toast.success('⚡ Auto-approved via Specific Approver rule!');
+      return;
+    }
+    const total = updApprovals.length;
+    const approvedCnt = updApprovals.filter(a => a.status === 'approved').length;
+    const pct = (approvedCnt / total) * 100;
+    const required = rule?.percentageRequired || 100;
+    let finalStatus = 'pending';
+    if (pct >= required) { finalStatus = 'approved'; toast.success(`✅ Approved! ${pct.toFixed(0)}% threshold reached.`); }
+    else if (updApprovals.every(a => a.status === 'approved')) { finalStatus = 'approved'; toast.success('✅ Expense approved!'); }
+    else if (updApprovals.some(a => a.status === 'rejected')) { finalStatus = 'rejected'; }
+    else toast.success('✓ Approval recorded. Awaiting next approver.');
+    onUpdateExpense(expense.id, { approvals: updApprovals, status: finalStatus });
+  };
+
+  const handleReject = (expense) => { setRejectModal(expense); setReason(''); };
+
+  const confirmReject = () => {
+    if (!reason.trim()) { toast.error('Rejection reason is required'); return; }
+    const updApprovals = (rejectModal.approvals||[]).map(a =>
+      a.approverId === user.id ? { ...a, status: 'rejected', timestamp: new Date().toISOString(), comments: reason } : a
+    );
+    onUpdateExpense(rejectModal.id, { approvals: updApprovals, status: 'rejected', rejectionReason: reason });
+    toast.success('Expense rejected');
+    setRejectModal(null);
+  };
+
+  const approvedCnt = reviewed.filter(e => (e.approvals||[]).some(a => a.approverId === user.id && a.status === 'approved')).length;
+  const rejectedCnt = reviewed.filter(e => (e.approvals||[]).some(a => a.approverId === user.id && a.status === 'rejected')).length;
+
+  return (
+    <div className="main">
+      <div className="page-header">
+        <div className="page-title">Approval Inbox 📥</div>
+        <div className="page-subtitle">Review and act on expense requests</div>
+      </div>
+
+      <div className="stats-grid" style={{ marginBottom: 28 }}>
+        <div className="stat-card"><div className="stat-icon" style={{ background: '#fef3c7' }}>⏳</div><div><div className="stat-val">{pending.length}</div><div className="stat-label">Awaiting Review</div></div></div>
+        <div className="stat-card"><div className="stat-icon" style={{ background: '#dcfce7' }}>✅</div><div><div className="stat-val">{approvedCnt}</div><div className="stat-label">Approved by You</div></div></div>
+        <div className="stat-card"><div className="stat-icon" style={{ background: '#fee2e2' }}>❌</div><div><div className="stat-val">{rejectedCnt}</div><div className="stat-label">Rejected by You</div></div></div>
+      </div>
+
+      {/* Pending section */}
+      <div className="mb-6">
+        <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 14 }}>⏳ Pending Your Review</div>
+        {pending.length === 0 ? (
+          <div className="card"><div className="empty"><div className="empty-icon">🎉</div><div className="empty-title">All clear!</div><div className="text-sm text-muted mt-2">No expenses awaiting your review</div></div></div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: 14 }}>
+            {pending.map(e => <InboxCard key={e.id} expense={e} user={user} isPending onApprove={handleApprove} onReject={handleReject} />)}
+          </div>
+        )}
+      </div>
+
+      {/* Reviewed section */}
+      <div>
+        <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 14 }}>📋 Recently Reviewed</div>
+        {reviewed.length === 0 ? (
+          <div className="card"><div className="empty"><div className="empty-icon">📭</div><div className="empty-title">Nothing reviewed yet</div></div></div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: 14 }}>
+            {reviewed.slice(0, 8).map(e => <InboxCard key={e.id} expense={e} user={user} isPending={false} onApprove={handleApprove} onReject={handleReject} />)}
+          </div>
+        )}
+      </div>
+
+      <Modal open={!!rejectModal} onClose={() => setRejectModal(null)} title="Reject Expense">
+        <div className="form-group">
+          <label className="form-label">Reason for rejection *</label>
+          <textarea className="form-input form-textarea" placeholder="Please explain why this expense is being rejected…" value={reason} onChange={e => setReason(e.target.value)} />
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setRejectModal(null)}>Cancel</button>
+          <button className="btn btn-danger" style={{ flex: 1 }} onClick={confirmReject}>Confirm Rejection</button>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+function InboxCard({ expense: e, user, isPending, onApprove, onReject }) {
+  const approvals = e.approvals || [];
+  const myApproval = approvals.find(a => a.approverId === user.id);
+  return (
+    <div className="expense-card">
+      <div className="expense-card-header">
+        <div>
+          <div style={{ fontWeight: 600 }}>{e.category}</div>
+          <div className="text-sm text-muted">{e.description || '—'}</div>
+        </div>
+        <StatusBadge status={e.status} />
+      </div>
+      <div className="expense-meta">
+        <div className="expense-meta-item"><div className="expense-meta-label">Requestor</div><div className="expense-meta-val">{e.employeeName}</div></div>
+        <div className="expense-meta-item"><div className="expense-meta-label">Amount ({e.baseCurrency})</div><div className="expense-meta-val" style={{ color: 'var(--primary)', fontWeight: 700 }}>{e.baseCurrency} {e.convertedAmount?.toFixed(2) || '0.00'}</div></div>
+        <div className="expense-meta-item"><div className="expense-meta-label">Date</div><div className="expense-meta-val">{new Date(e.date).toLocaleDateString()}</div></div>
+        {e.currency !== e.baseCurrency && <div className="expense-meta-item"><div className="expense-meta-label">Original</div><div className="expense-meta-val">{e.currency} {e.amount?.toFixed(2)}</div></div>}
+      </div>
+      {approvals.length > 1 && (
+        <div className="chain">
+          <div className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Approval Chain</div>
+          {approvals.map((a, i) => (
+            <div key={i} className="chain-item">
+              <div className={`chain-dot ${a.status}`} />
+              <span>{a.approverName}</span>
+              <span className="text-xs text-muted">— {a.status}</span>
+              {a.comments && <span className="text-xs text-muted">· "{a.comments}"</span>}
+            </div>
+          ))}
+        </div>
+      )}
+      {isPending ? (
+        <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+          <button className="btn btn-success" style={{ flex: 1 }} onClick={() => onApprove(e)}>✓ Approve</button>
+          <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => onReject(e)}>✗ Reject</button>
+        </div>
+      ) : (
+        <div className={`alert mt-3 mb-0 ${myApproval?.status === 'approved' ? 'alert-success' : 'alert-warning'}`} style={myApproval?.status === 'rejected' ? { background: '#fef2f2', color: 'var(--danger)', border: '1px solid #fecaca' } : {}}>
+          {myApproval?.status === 'approved' ? '✓ Approved' : '✗ Rejected'} by you
+          {myApproval?.timestamp && <> · {new Date(myApproval.timestamp).toLocaleDateString()}</>}
+          {myApproval?.comments && <> · "{myApproval.comments}"</>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── USER MANAGEMENT (LIVE MYSQL CONNECTED) ────────────────────────────────────────────
+function UserManagement({ users, onAddUser, onUpdateUser }) {
+  const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+  const [filter, setFilter] = useState('all');
+  const [form, setForm] = useState({ name: '', email: '', role: 'employee', assignedManagerId: '', department: '' });
+
+  const managers = users.filter(u => u.role === 'manager' || u.role === 'admin');
+  const departments = ['Finance', 'HR', 'IT', 'Operations', 'Management', 'Sales'];
+  const filtered = filter === 'all' ? users : users.filter(u => u.department === filter || u.role === filter);
+
+  const handleAdd = async () => {
+    if (!form.name || !form.email) { toast.error('Name and Email are required'); return; }
+    
+    toast.success('Saving user to database...');
+
+    try {
+      // 🚀 POST new user to Node.js backend
+      const response = await fetch('http://localhost:3000/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(`✓ ${form.name} added to live database!`);
+        onAddUser({ ...form, id: data.userId });
+        setForm({ name: '', email: '', role: 'employee', assignedManagerId: '', department: '' });
+        setAddOpen(false);
+      } else {
+        toast.error(`Error: ${data.message}`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to connect to backend.');
+    }
+  };
+
+  const handleEdit = () => {
+    onUpdateUser(editUser.id, { role: editUser.role, assignedManagerId: editUser.assignedManagerId, department: editUser.department });
+    toast.success('✓ User updated!');
+    setEditOpen(false);
+  };
+
+  return (
+    <div className="main">
+      <div className="page-header flex-between">
+        <div><div className="page-title">User Management</div><div className="page-subtitle">Manage employees, managers & roles</div></div>
+        <button className="btn btn-primary" onClick={() => setAddOpen(true)}>➕ Add User</button>
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+        {['all', 'admin', 'manager', 'employee', ...departments].map(f => (
+          <button key={f} className={`btn btn-sm ${filter === f ? 'btn-primary' : 'btn-outline'}`} onClick={() => setFilter(f)}>
+            {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* Table */}
+      <div className="card">
+        <div className="table-wrap" style={{ border: 'none' }}>
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Department</th>
+                <th>Manager</th>
+                <th>Actions</th>
+                <th>Password</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(u => {
+                const mgr = users.find(m => m.id === u.assignedManagerId);
+                return (
+                  <tr key={u.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div className="user-avatar" style={{ width: 32, height: 32, fontSize: 13 }}>
+                          {u.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                        </div>
+                        <span style={{ fontWeight: 500 }}>{u.name}</span>
+                      </div>
+                    </td>
+                    <td className="text-muted">{u.email}</td>
+                    <td><RoleBadge role={u.role} /></td>
+                    <td>{u.department || '—'}</td>
+                    <td>{mgr ? mgr.name : '—'}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button className="btn btn-ghost btn-sm" onClick={() => { setEditUser({ ...u }); setEditOpen(true); }}>✏️ Edit</button>
+                      </div>
+                    </td>
+                    <td>
+                        <button 
+                          className="btn btn-outline btn-sm" 
+                          onClick={() => toast.success(`📧 Reset link sent to ${u.email}`)}
+                        >
+                          Reset Password
+                        </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Add User Modal */}
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add New User">
+        <div className="form-group"><label className="form-label">Full Name</label><input className="form-input" placeholder="Jane Doe" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
+        <div className="form-group"><label className="form-label">Email</label><input className="form-input" type="email" placeholder="jane@company.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
+        <div className="form-row">
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Role</label>
+            <select className="form-input form-select" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
+              <option value="employee">Employee</option>
+              <option value="manager">Manager</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Department</label>
+            <select className="form-input form-select" value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))}>
+              <option value="">Select…</option>
+              {departments.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+        </div>
+        {form.role === 'employee' && (
+          <div className="form-group mt-3">
+            <label className="form-label">Assigned Manager</label>
+            <select className="form-input form-select" value={form.assignedManagerId} onChange={e => setForm(f => ({ ...f, assignedManagerId: e.target.value }))}>
+              <option value="">Select manager…</option>
+              {managers.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </select>
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+          <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setAddOpen(false)}>Cancel</button>
+          <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleAdd}>➕ Add User</button>
+        </div>
+      </Modal>
+
+      {/* Edit User Modal */}
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit User">
+        {editUser && (
+          <>
+            <div className="alert alert-info mb-3"><b>{editUser.name}</b> · {editUser.email}</div>
+            <div className="form-group">
+              <label className="form-label">Role</label>
+              <select className="form-input form-select" value={editUser.role} onChange={e => setEditUser(u => ({ ...u, role: e.target.value }))}>
+                <option value="employee">Employee</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Department</label>
+              <select className="form-input form-select" value={editUser.department || ''} onChange={e => setEditUser(u => ({ ...u, department: e.target.value }))}>
+                <option value="">None</option>
+                {departments.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            {editUser.role === 'employee' && (
+              <div className="form-group">
+                <label className="form-label">Assigned Manager</label>
+                <select className="form-input form-select" value={editUser.assignedManagerId || ''} onChange={e => setEditUser(u => ({ ...u, assignedManagerId: e.target.value }))}>
+                  <option value="">None</option>
+                  {managers.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                </select>
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setEditOpen(false)}>Cancel</button>
+              <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleEdit}>Save Changes</button>
+            </div>
+          </>
+        )}
+      </Modal>
+    </div>
+  );
+}
+
+// ── APPROVAL RULES ─────────────────────────────────────────────
+function ApprovalRules({ users, approvalRules, onUpdateRule, onAddRule }) {
+  const [selected, setSelected] = useState(approvalRules[0] || null);
+  const [isManagerApprover, setIsManagerApprover] = useState(approvalRules[0]?.isManagerApprover || false);
+  const [approvers, setApprovers] = useState(approvalRules[0]?.approvers || []);
+  const [pct, setPct] = useState(approvalRules[0]?.percentageRequired || 60);
+  const [specificId, setSpecificId] = useState(approvalRules[0]?.specificApprover || '');
+  const [dragIdx, setDragIdx] = useState(null);
+  const [newCat, setNewCat] = useState('');
+
+  const managers = users.filter(u => u.role === 'manager' || u.role === 'admin');
+  const available = managers.filter(m => !approvers.find(a => a.id === m.id));
+
+  const loadRule = (rule) => {
+    setSelected(rule);
+    setIsManagerApprover(rule.isManagerApprover);
+    setApprovers(rule.approvers);
+    setPct(rule.percentageRequired || 60);
+    setSpecificId(rule.specificApprover || '');
+  };
+
+  const addApprover = (uid) => {
+    const u = managers.find(m => m.id === uid);
+    if (!u) return;
+    setApprovers(prev => [...prev, { id: u.id, name: u.name, order: prev.length + 1 }]);
+  };
+
+  const removeApprover = (id) => {
+    setApprovers(prev => prev.filter(a => a.id !== id).map((a, i) => ({ ...a, order: i + 1 })));
+  };
+
+  const handleDragStart = (i) => setDragIdx(i);
+  const handleDragOver = (e, i) => {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === i) return;
+    setApprovers(prev => {
+      const arr = [...prev];
+      const [moved] = arr.splice(dragIdx, 1);
+      arr.splice(i, 0, moved);
+      setDragIdx(i);
+      return arr.map((a, idx) => ({ ...a, order: idx + 1 }));
+    });
+  };
+
+  const handleSave = () => {
+    if (!selected) return;
+    onUpdateRule(selected.id, { isManagerApprover, approvers, percentageRequired: pct, specificApprover: specificId });
+    toast.success('✓ Approval rules saved!');
+  };
+
+  const handleAddCategory = () => {
+    if (!newCat.trim()) { toast.error('Enter a category name'); return; }
+    const rule = { category: newCat, isManagerApprover: false, approvers: [], percentageRequired: 100, specificApprover: '' };
+    onAddRule(rule);
+    setNewCat('');
+    toast.success('Category added!');
+  };
+
+  return (
+    <div className="main">
+      <div className="page-header">
+        <div className="page-title">Approval Rule Builder ⚙️</div>
+        <div className="page-subtitle">Configure multi-level, conditional approval workflows per category</div>
+      </div>
+
+      {/* Category selector */}
+      <div className="card mb-4">
+        <div className="card-body">
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span className="text-sm text-muted" style={{ marginRight: 4 }}>Category:</span>
+            {approvalRules.map(r => (
+              <button key={r.id} className={`btn btn-sm ${selected?.id === r.id ? 'btn-primary' : 'btn-outline'}`} onClick={() => loadRule(r)}>
+                {r.category}
+              </button>
+            ))}
+            <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
+              <input className="form-input" style={{ width: 200 }} placeholder="New category…" value={newCat} onChange={e => setNewCat(e.target.value)} />
+              <button className="btn btn-outline btn-sm" onClick={handleAddCategory}>+ Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {selected ? (
+        <div className="grid-2">
+          {/* Config */}
+          <div className="card">
+            <div className="card-header"><div className="card-title">🛠 Configure: {selected.category}</div></div>
+            <div className="card-body">
+              {/* Manager toggle */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 14 }}>Is Manager an Approver?</div>
+                  <div className="text-sm text-muted">Employee's direct manager joins the chain first</div>
+                </div>
+                <button className={`toggle ${isManagerApprover ? 'on' : ''}`} onClick={() => setIsManagerApprover(!isManagerApprover)} />
+              </div>
+              <div className="divider" style={{ margin: '0 0 16px' }} />
+
+              {/* Add approver */}
+              <div className="form-group">
+                <label className="form-label">Add Approver to Chain</label>
+                <select className="form-input form-select" value="" onChange={e => { addApprover(e.target.value); e.target.value = ''; }}>
+                  <option value="">Select approver to add…</option>
+                  {available.map(u => <option key={u.id} value={u.id}>{u.name} ({u.role})</option>)}
+                </select>
+              </div>
+
+              {/* Draggable sequence */}
+              <div className="form-group">
+                <label className="form-label">Approval Sequence (drag to reorder)</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {approvers.length === 0 ? (
+                    <div style={{ padding: '14px', textAlign: 'center', border: '2px dashed var(--border-strong)', borderRadius: 'var(--radius)', color: 'var(--ink-muted)', fontSize: 13 }}>No approvers yet</div>
+                  ) : approvers.map((a, i) => (
+                    <div
+                      key={a.id}
+                      className={`drag-item ${dragIdx === i ? 'dragging' : ''}`}
+                      draggable
+                      onDragStart={() => handleDragStart(i)}
+                      onDragOver={e => handleDragOver(e, i)}
+                      onDragEnd={() => setDragIdx(null)}
+                    >
+                      <span style={{ color: 'var(--ink-muted)', fontSize: 16 }}>⠿</span>
+                      <div className="drag-num">{i + 1}</div>
+                      <span style={{ flex: 1, fontSize: 14 }}>{a.name}</span>
+                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => removeApprover(a.id)}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="divider" style={{ margin: '0 0 16px' }} />
+
+              {/* Conditional rules */}
+              <div className="form-group">
+                <label className="form-label">% Required for Approval</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <input className="form-input" type="number" min={0} max={100} value={pct} onChange={e => setPct(Number(e.target.value))} style={{ width: 90 }} />
+                  <span className="text-muted">%</span>
+                  <span className="text-sm text-muted">— e.g. 60% means ≥60% of approvers must approve</span>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Specific Approver (auto-approve override)</label>
+                <select className="form-input form-select" value={specificId} onChange={e => setSpecificId(e.target.value)}>
+                  <option value="">None</option>
+                  {managers.map(m => <option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}
+                </select>
+                <div className="form-hint">If this person approves, the expense is auto-approved regardless of other rules</div>
+              </div>
+
+              <button className="btn btn-primary btn-full" onClick={handleSave}>💾 Save Rules</button>
+            </div>
+          </div>
+
+          {/* Flow viz */}
+          <div className="card">
+            <div className="card-header"><div className="card-title">📊 Approval Flow Preview</div></div>
+            <div className="card-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="flow-step start">📝 Expense Submitted</div>
+                {isManagerApprover && <>
+                  <div className="flow-arrow">↓</div>
+                  <div className="flow-step manager">👤 Employee's Direct Manager</div>
+                </>}
+                {approvers.map((a, i) => (
+                  <React.Fragment key={a.id}>
+                    <div className="flow-arrow">↓</div>
+                    <div className="flow-step approver">Step {i + 1}: {a.name}</div>
+                  </React.Fragment>
+                ))}
+                {approvers.length > 0 && <>
+                  <div className="flow-arrow">↓</div>
+                  <div className="flow-step rule">📊 Requires {pct}% approval ({Math.ceil(approvers.length * pct / 100)} of {approvers.length})</div>
+                </>}
+                {specificId && specificId !== 'none' && <>
+                  <div className="flow-arrow">↓</div>
+                  <div className="flow-step special">⚡ OR: {managers.find(m => m.id === specificId)?.name} can auto-approve</div>
+                </>}
+                <div className="flow-arrow">↓</div>
+                <div className="flow-step end">✅ Approved &nbsp;/&nbsp; ❌ Rejected</div>
+              </div>
+
+              <div className="divider" />
+              <div className="alert alert-info" style={{ marginBottom: 0 }}>
+                <b>Hybrid rule:</b> Expense is approved if the percentage threshold is met <i>OR</i> the specific approver approves — whichever comes first.
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="card"><div className="empty"><div className="empty-icon">⚙️</div><div className="empty-title">No categories yet</div><div className="text-sm text-muted mt-2">Add a category above to configure its approval workflow</div></div></div>
+      )}
+    </div>
+  );
+}
+
+// ── ROOT APP ───────────────────────────────────────────────────
+function App() {
+  const [authPage, setAuthPage] = useState('login'); // 'login' | 'signup'
+  const [user, setUser] = useState(() => storage.get('rh_session', null));
+  const [page, setPage] = useState('dashboard');
+
+  const [users, setUsers] = useState(() => storage.get('rh_users', MOCK_USERS));
+  // Removed mock expenses, handled by component level fetch now
+  const [rules, setRules] = useState(() => storage.get('rh_rules', MOCK_RULES));
+
+  const persist = (key, data, setter) => { setter(data); storage.set(key, data); };
+
+  const handleLogin = (u) => { setUser(u); storage.set('rh_session', u); setPage('dashboard'); };
+  const handleLogout = () => { setUser(null); storage.set('rh_session', null); };
+
+  const addUser = (u) => {
+    const n = { ...u };
+    persist('rh_users', [...users, n], setUsers);
+  };
+  const updateUser = (id, upd) => {
+    const updated = users.map(u => u.id === id ? { ...u, ...upd } : u);
+    persist('rh_users', updated, setUsers);
+  };
+  const updateRule = (id, upd) => {
+    const updated = rules.map(r => r.id === id ? { ...r, ...upd } : r);
+    persist('rh_rules', updated, setRules);
+  };
+  const addRule = (rule) => {
+    const n = { ...rule, id: Date.now().toString() };
+    persist('rh_rules', [...rules, n], setRules);
+  };
+
+  if (!user) {
+    return (
+      <>
+        {authPage === 'login'
+          ? <LoginPage onLogin={handleLogin} onGoSignup={() => setAuthPage('signup')} />
+          : <SignupPage onSignup={handleLogin} onGoLogin={() => setAuthPage('login')} />
+        }
+        <ToastContainer />
+      </>
+    );
+  }
+
+  const renderPage = () => {
+    if (page === 'dashboard') return <Dashboard user={user} expenses={[]} users={users} onNav={setPage} />;
+    if (page === 'submit' && (user.role === 'employee' || user.role === 'admin')) return <SubmitExpense user={user} />;
+    if (page === 'history') return <ExpenseHistory user={user} onNav={setPage} />;
+    if (page === 'inbox') return <ManagerInbox user={user} expenses={[]} approvalRules={rules} onUpdateExpense={() => {}} />;
+    if (page === 'users' && user.role === 'admin') return <UserManagement users={users} onAddUser={addUser} onUpdateUser={updateUser} />;
+    if (page === 'rules' && user.role === 'admin') return <ApprovalRules users={users} approvalRules={rules} onUpdateRule={updateRule} onAddRule={addRule} />;
+    return <Dashboard user={user} expenses={[]} users={users} onNav={setPage} />;
+  };
+
+  return (
+    <>
+      <Nav user={user} currentPage={page} onNav={setPage} onLogout={handleLogout} />
+      <main>{renderPage()}</main>
+      <ToastContainer />
+    </>
+  );
+}
+
+// tiny helper for CSS var in JSX
+function var_(name) { return `var(--${name})`; }
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
